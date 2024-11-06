@@ -19,6 +19,8 @@ int main()
     treeSortAddNode(start_node, &c, sizeof(c), cmpInt);
 
     printTree(start_node, printInt);
+    treeDumpGraph(start_node, intToStr);
+
     putchar('\n');
 
     treeDestroy(start_node);
