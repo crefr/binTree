@@ -8,18 +8,20 @@ int main()
 {
     system("mkdir -p logs/");
     logStart("logs/log.html", LOG_DEBUG, LOG_HTML);
-    int a = 52;
-    int b = 53;
-    int c = 54;
-    node_t * node_1 = newNode(&a, sizeof(a));
-    node_t * node_2 = newNode(&b, sizeof(b));
-    node_t * node_3 = newNode(&c, sizeof(c));
 
-    node_1->left =  node_2;
-    node_1->right = node_3;
+    int start_val = 50;
+    node_t * start_node = newNode(&start_val, sizeof(start_val));
+    int a = 25;
+    int b = 75;
+    int c = 100;
+    treeSortAddNode(start_node, &a, sizeof(a), cmpInt);
+    treeSortAddNode(start_node, &b, sizeof(b), cmpInt);
+    treeSortAddNode(start_node, &c, sizeof(c), cmpInt);
 
-    printTree(node_1, printInt);
+    printTree(start_node, printInt);
     putchar('\n');
+
+    treeDestroy(start_node);
     logExit();
     return 0;
 }

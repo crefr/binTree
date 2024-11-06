@@ -14,14 +14,21 @@ typedef struct tree {
     size_t elem_size;
 } tree_t;
 
-typedef void (*printfunc_t)(void *);
+typedef void(*printfunc_t)(void *);
+typedef int (*compare_func_t)(void *, void *);
 
 node_t * newNode(void * data, size_t elem_size);
 
 void delNode(node_t * node);
 
+void treeDestroy(node_t * node);
+
 void printInt(void * data);
 
 void printTree(node_t * node, printfunc_t printElem);
+
+void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_t cmp);
+
+int cmpInt(void * first, void * second);
 
 #endif
