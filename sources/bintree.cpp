@@ -169,12 +169,15 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
     elemToStr(elem_str, node->data);
     fprintf(dot_file, "node_%zu"
                       "[shape=Mrecord,label="
-                      "\"{node at %p | left = %p | right = %p | parent = %p | data = %s}\","
+                      "\"{node at %p | parent = %p | %s | {<f0> left = %p |<f1> right = %p}}\","
                       "color=\"#7229c4\"];\n",
-                      node_num, node, node->left, node->right, node->parent, elem_str);
+                      node_num, node, node->parent, elem_str, node->left, node->right);
     if (node->parent != NULL){
         size_t node_parent_num = (size_t)(node->parent); //TODO: cringe?
-        fprintf(dot_file, "node_%zu->node_%zu;\n", node_parent_num, node_num);
+        if (node == node->parent->left)
+            fprintf(dot_file, "node_%zu:f0->node_%zu;\n", node_parent_num, node_num);
+        else
+            fprintf(dot_file, "node_%zu:f1->node_%zu;\n", node_parent_num, node_num);
     }
     if (node->left  != NULL)
         nodeMakeDot(node->left,  elemToStr, dot_file);
