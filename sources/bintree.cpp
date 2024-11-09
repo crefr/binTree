@@ -108,7 +108,8 @@ void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
 {
     assert(root_node);
 
-    const int IMG_SIZE_IN_PERCENTS = 85;
+    const int  IMG_WIDTH_IN_PERCENTS = 95;
+    const int IMG_HEIGTH_IN_PERCENTS = 70;
 
     static size_t dump_count = 0;
 
@@ -119,19 +120,22 @@ void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
     system("mkdir -p logs/dots/");
     system("mkdir -p logs/imgs/");
     sprintf(dot_file_name, "logs/dots/graph_%zu.dot", dump_count);
-    sprintf(img_file_name, "logs/imgs/graph_%zu.png", dump_count);
+    sprintf(img_file_name, "logs/imgs/graph_%zu.svg", dump_count);
 
     FILE * dot_file = fopen(dot_file_name, "w");
     treeMakeDot(root_node, elemToStr, dot_file);
     fclose(dot_file);
 
     char sys_dot_cmd[MAX_FILE_NAME] = "";
-    sprintf(sys_dot_cmd, "dot %s -Tpng -o %s", dot_file_name, img_file_name);
+    sprintf(sys_dot_cmd, "dot %s -Tsvg -o %s", dot_file_name, img_file_name);
     system(sys_dot_cmd);
 
     char img_file_name_log[MAX_FILE_NAME] = "";
-    sprintf(img_file_name_log, "imgs/graph_%zu.png", dump_count);
-    logPrint(LOG_DEBUG, "<img src = %s width = \"%d%%\">", img_file_name_log, IMG_SIZE_IN_PERCENTS);
+    sprintf(img_file_name_log, "imgs/graph_%zu.svg", dump_count);
+    logPrint(LOG_DEBUG, "<img src = %s width = \"%d%%\" height = \"%d%%\">",
+                        img_file_name_log,
+                        IMG_WIDTH_IN_PERCENTS,
+                        IMG_HEIGTH_IN_PERCENTS);
 
     logPrint(LOG_DEBUG, "<hr>");
 
