@@ -1,6 +1,8 @@
 #ifndef BINTREE_INCLUDED
 #define BINTREE_INCLUDED
 
+#include <wchar.h>
+
 typedef struct node {
     void * data;
     size_t elem_size;
@@ -17,6 +19,7 @@ typedef struct tree {
 typedef void(*printfunc_t)(void *);
 typedef int (*compare_func_t)(void *, void *);
 typedef void(*elemtostr_func_t)(char *, void *);
+typedef void(*elemtowcs_func_t)(wchar_t *, void *);
 
 node_t * newNode(void * data, size_t elem_size);
 
@@ -30,7 +33,11 @@ void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_
 
 void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr);
 
+void treeDumpGraphWcs(node_t * root_node, elemtowcs_func_t elemToStr);
+
 void treeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file);
+
+void treeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot_file);
 
 /*---------------------------------------------------------------------------------*/
 int cmpInt(void * first, void * second);

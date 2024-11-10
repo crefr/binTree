@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include <wchar.h>
 
 #include "logger.h"
 #include "bintree.h"
@@ -146,7 +147,56 @@ void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
     dump_count++;
 }
 
-static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file);
+void treeDumpGraphWcs(node_t * root_node, elemtowcs_func_t elemToStr)
+{
+    assert(root_node);
+
+    const int  IMG_WIDTH_IN_PERCENTS = 95;
+    const int IMG_HEIGTH_IN_PERCENTS = 70;
+
+    static size_t dump_count = 0;
+
+    const size_t MAX_FILE_NAME = 256;
+    char dot_file_name[MAX_FILE_NAME] = "";
+    char img_file_name[MAX_FILE_NAME] = "";
+
+    system("mkdir -p logs/dots/");
+    system("mkdir -p logs/imgs/");
+    sprintf(dot_file_name, "logs/dots/graph_%zu.dot", dump_count);
+    sprintf(img_file_name, "logs/imgs/graph_%zu.svg", dump_count);
+
+    FILE * dot_file = fopen(dot_file_name, "w");
+    treeMakeDotWcs(root_node, elemToStr, dot_file);
+    fclose(dot_file);
+
+    char sys_dot_cmd[MAX_FILE_NAME] = "";
+    sprintf(sys_dot_cmd, "dot %s -Tsvg -o %s", dot_file_name, img_file_name);
+    system(sys_dot_cmd);
+
+    char img_file_name_log[MAX_FILE_NAME] = "";
+    sprintf(img_file_name_log, "imgs/graph_%zu.svg", dump_count);
+    logPrint(LOG_DEBUG, "<img src = %s width = \"%d%%\" height = \"%d%%\">",
+                        img_file_name_log,
+                        IMG_WIDTH_IN_PERCENTS,
+                        IMG_HEIGTH_IN_PERCENTS);
+
+    logPrint(LOG_DEBUG, "<hr>");
+
+    dump_count++;
+}
+
+static void nodeMakeDot   (node_t * node, elemtostr_func_t elemToStr, FILE * dot_file);
+
+static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot_file);
+
+void treeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot_file)
+{
+    assert(node);
+    assert(dot_file);
+    fwprintf(dot_file, L"digraph {\n");
+    nodeMakeDotWcs(node, elemToStr, dot_file);
+    fwprintf(dot_file, L"}\n");
+}
 
 void treeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file)
 {
@@ -184,3 +234,32 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
     if (node->right != NULL)
         nodeMakeDot(node->right, elemToStr, dot_file);
 }
+
+static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot_file)
+{
+    assert(node);
+    assert(dot_file);
+
+    size_t node_num = (size_t)node; //TODO: cringe?
+
+    const size_t MAX_ELEM_STR_LEN = 64;
+    wchar_t elem_str[MAX_ELEM_STR_LEN] = L"";
+    elemToStr(elem_str, node->data);
+    fwprintf(dot_file, L"node_%zu"
+                      L"[shape=Mrecord,label="
+                      L"\"{node at %p | parent = %p | %ls | {<f0> left = %p |<f1> right = %p}}\","
+                      L"color=\"#7229c4\"];\n",
+                      node_num, node, node->parent, elem_str, node->left, node->right);
+    if (node->parent != NULL){
+        size_t node_parent_num = (size_t)(node->parent); //TODO: cringe?
+        if (node == node->parent->left)
+            fwprintf(dot_file, L"node_%zu:f0->node_%zu;\n", node_parent_num, node_num);
+        else
+            fwprintf(dot_file, L"node_%zu:f1->node_%zu;\n", node_parent_num, node_num);
+    }
+    if (node->left  != NULL)
+        nodeMakeDotWcs(node->left,  elemToStr, dot_file);
+    if (node->right != NULL)
+        nodeMakeDotWcs(node->right, elemToStr, dot_file);
+}
+
