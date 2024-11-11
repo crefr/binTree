@@ -31,6 +31,9 @@ void printTree(node_t * node, printfunc_t printElem);
 
 void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_t cmp);
 
+node_t * treeFindNode(node_t * node, void * data, compare_func_t cmp);
+
+
 void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr);
 
 void treeDumpGraphWcs(node_t * root_node, elemtowcs_func_t elemToStr);

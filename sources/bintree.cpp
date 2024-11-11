@@ -263,3 +263,21 @@ static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot
         nodeMakeDotWcs(node->right, elemToStr, dot_file);
 }
 
+node_t * treeFindNode(node_t * node, void * data, compare_func_t cmp)
+{
+    assert(node);
+    assert(data);
+    logPrint(LOG_DEBUG_PLUS, "finding node in tree (%p)...\n", node);
+    if (node == NULL)
+        return NULL;
+
+    if (cmp(data, node->data) == 0)
+        return node;
+
+    node_t * next_node_result = treeFindNode(node->left, data, cmp);
+    if (next_node_result != NULL)
+        return next_node_result;
+
+    next_node_result = treeFindNode(node->right, data, cmp);
+    return next_node_result;
+}

@@ -12,13 +12,21 @@ int main()
     int start_val = 128;
     node_t * start_node = newNode(&start_val, sizeof(start_val));
 
-    for (int i = 0; i < 256; i++){
-        int ans =  rand() % 256;
+    for (int i = 0; i < 8; i++){
+        int ans =  rand() % 4;
         treeSortAddNode(start_node, &ans, sizeof(ans), cmpInt);
     }
 
+    int find_ans = 2;
+    node_t * search_node = treeFindNode(start_node, &find_ans, cmpInt);
+    printTree(search_node, printInt);
+    printf("\n");
+
     printTree(start_node, printInt);
+    printf("\n");
+
     treeDumpGraph(start_node, intToStr);
+    treeDumpGraph(search_node, intToStr);
 
     putchar('\n');
 
