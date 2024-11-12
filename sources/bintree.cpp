@@ -175,12 +175,12 @@ void treeDumpGraphWcs(node_t * root_node, elemtowcs_func_t elemToStr)
 
     char img_file_name_log[MAX_FILE_NAME] = "";
     sprintf(img_file_name_log, "imgs/graph_%zu.svg", dump_count);
-    logPrint(LOG_DEBUG, "<img src = %s width = \"%d%%\" height = \"%d%%\">",
+    wlogPrint(LOG_DEBUG, L"<img src = %s width = \"%d%%\" height = \"%d%%\">",
                         img_file_name_log,
                         IMG_WIDTH_IN_PERCENTS,
                         IMG_HEIGTH_IN_PERCENTS);
 
-    logPrint(LOG_DEBUG, "<hr>");
+    wlogPrint(LOG_DEBUG, L"<hr>");
 
     dump_count++;
 }
@@ -228,7 +228,7 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
 
     fprintf(dot_file, "node_%zu"
                       "[shape=Mrecord,label="
-                      "\"{node at %p | parent = %p | %s | {<f0> left = %p |<f1> right = %p}}\","
+                      "\"{node at %p | parent = %p | \\\"%s\\\" | {<f0> left = %p |<f1> right = %p}}\","
                       "fillcolor=\"%s\"];\n",
                       node_num, node, node->parent, elem_str, node->left, node->right, COLOR_STR);
     if (node->parent != NULL){
@@ -263,7 +263,7 @@ static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot
 
     fwprintf(dot_file, L"node_%zu"
                        L"[shape=Mrecord,label="
-                       L"\"{node at %p | parent = %p | %ls | {<f0> left = %p |<f1> right = %p}}\","
+                       L"\"{node at %p | parent = %p | \\\"%ls\\\" | {<f0> left = %p |<f1> right = %p}}\","
                        L"fillcolor=\"%s\"];\n",
                        node_num, node, node->parent, elem_str, node->left, node->right, COLOR_STR);
     if (node->parent != NULL){
@@ -281,7 +281,6 @@ static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot
 
 node_t * treeFindNode(node_t * node, void * data, compare_func_t cmp)
 {
-    assert(node);
     assert(data);
     logPrint(LOG_DEBUG_PLUS, "finding node in tree (%p)...\n", node);
     if (node == NULL)
