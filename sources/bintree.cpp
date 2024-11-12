@@ -194,6 +194,7 @@ void treeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot_file)
     assert(node);
     assert(dot_file);
     fwprintf(dot_file, L"digraph {\n");
+    fwprintf(dot_file, L"node [style=filled,color=\"#000000\"]");
     nodeMakeDotWcs(node, elemToStr, dot_file);
     fwprintf(dot_file, L"}\n");
 }
@@ -203,6 +204,7 @@ void treeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file)
     assert(node);
     assert(dot_file);
     fprintf(dot_file, "digraph {\n");
+    fprintf(dot_file, "node [style=filled,color=\"#000000\"]");
     nodeMakeDot(node, elemToStr, dot_file);
     fprintf(dot_file, "}\n");
 }
@@ -217,11 +219,18 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
     const size_t MAX_ELEM_STR_LEN = 64;
     char elem_str[MAX_ELEM_STR_LEN] = "";
     elemToStr(elem_str, node->data);
+
+        const char * COLOR_STR = "";
+    if (node->parent == NULL)
+        COLOR_STR = ROOT_COLOR;
+    else
+        COLOR_STR = (node == node->parent->left) ? LEFT_COLOR : RIGHT_COLOR;
+
     fprintf(dot_file, "node_%zu"
                       "[shape=Mrecord,label="
                       "\"{node at %p | parent = %p | %s | {<f0> left = %p |<f1> right = %p}}\","
-                      "color=\"#7229c4\"];\n",
-                      node_num, node, node->parent, elem_str, node->left, node->right);
+                      "fillcolor=\"%s\"];\n",
+                      node_num, node, node->parent, elem_str, node->left, node->right, COLOR_STR);
     if (node->parent != NULL){
         size_t node_parent_num = (size_t)(node->parent); //TODO: cringe?
         if (node == node->parent->left)
@@ -245,11 +254,18 @@ static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot
     const size_t MAX_ELEM_STR_LEN = 64;
     wchar_t elem_str[MAX_ELEM_STR_LEN] = L"";
     elemToStr(elem_str, node->data);
+
+    const char * COLOR_STR = "";
+    if (node->parent == NULL)
+        COLOR_STR = ROOT_COLOR;
+    else
+        COLOR_STR = (node == node->parent->left) ? LEFT_COLOR : RIGHT_COLOR;
+
     fwprintf(dot_file, L"node_%zu"
-                      L"[shape=Mrecord,label="
-                      L"\"{node at %p | parent = %p | %ls | {<f0> left = %p |<f1> right = %p}}\","
-                      L"color=\"#7229c4\"];\n",
-                      node_num, node, node->parent, elem_str, node->left, node->right);
+                       L"[shape=Mrecord,label="
+                       L"\"{node at %p | parent = %p | %ls | {<f0> left = %p |<f1> right = %p}}\","
+                       L"fillcolor=\"%s\"];\n",
+                       node_num, node, node->parent, elem_str, node->left, node->right, COLOR_STR);
     if (node->parent != NULL){
         size_t node_parent_num = (size_t)(node->parent); //TODO: cringe?
         if (node == node->parent->left)

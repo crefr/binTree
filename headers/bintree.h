@@ -50,4 +50,8 @@ void intToStr(char * str, void * data);
 void printInt(void * data);
 /*---------------------------------------------------------------------------------*/
 
+const char * const  ROOT_COLOR = "#FFFFAA";
+const char * const  LEFT_COLOR = "#AAFFAA";
+const char * const RIGHT_COLOR = "#FFAAAA";
+
 #endif
