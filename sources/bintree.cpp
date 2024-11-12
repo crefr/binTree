@@ -33,7 +33,7 @@ void intToStr(char * str, void * data)
 node_t * newNode(void * data, size_t elem_size)
 {
     assert(data);
-    logPrint(LOG_DEBUG_PLUS, "bintree: creating new node (elem_size = %zu)\n", elem_size);
+    wlogPrint(LOG_DEBUG_PLUS, L"bintree: creating new node (elem_size = %zu)\n", elem_size);
     node_t * new_node = (node_t *)calloc(1, sizeof(*new_node));
 
     new_node->elem_size = elem_size;
@@ -43,17 +43,17 @@ node_t * newNode(void * data, size_t elem_size)
     new_node->left   = NULL;
     new_node->right  = NULL;
     new_node->parent = NULL;
-    logPrint(LOG_DEBUG_PLUS, "bintree: created node at %p\n", new_node);
+    wlogPrint(LOG_DEBUG_PLUS, L"bintree: created node at %p\n", new_node);
     return new_node;
 }
 
 void delNode(node_t * node)
 {
     assert(node);
-    logPrint(LOG_DEBUG_PLUS, "bintree: deleting node at %p\n", node);
+    wlogPrint(LOG_DEBUG_PLUS, L"bintree: deleting node at %p\n", node);
     free(node->data);
     free(node);
-    logPrint(LOG_DEBUG_PLUS, "bintree: deleted node\n");
+    wlogPrint(LOG_DEBUG_PLUS, L"bintree: deleted node\n");
 }
 
 void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_t cmp)
@@ -93,7 +93,7 @@ void printTree(node_t * node, printfunc_t printElem)
 
 void treeDestroy(node_t * node)
 {
-    logPrint(LOG_DEBUG_PLUS, "bintree: destroying tree (subtree) with root at %p...\n", node);
+    wlogPrint(LOG_DEBUG_PLUS, L"bintree: destroying tree (subtree) with root at %p...\n", node);
     if (node == NULL)
         return;
 
@@ -106,7 +106,7 @@ void treeDestroy(node_t * node)
         node->right = NULL;
     }
     delNode(node);
-    logPrint(LOG_DEBUG_PLUS, "bintree: destroyed tree (subtree) with root at %p\n", node);
+    wlogPrint(LOG_DEBUG_PLUS, L"bintree: destroyed tree (subtree) with root at %p\n", node);
 }
 
 void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
@@ -282,7 +282,7 @@ static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot
 node_t * treeFindNode(node_t * node, void * data, compare_func_t cmp)
 {
     assert(data);
-    logPrint(LOG_DEBUG_PLUS, "finding node in tree (%p)...\n", node);
+    wlogPrint(LOG_DEBUG_PLUS, L"finding node in tree (%p)...\n", node);
     if (node == NULL)
         return NULL;
 
