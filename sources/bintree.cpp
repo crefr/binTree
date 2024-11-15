@@ -7,27 +7,11 @@
 #include "logger.h"
 #include "bintree.h"
 
-void printInt(void * data)
-{
-    assert(data);
-    printf("%d", *((int *)data));
-}
+dump_mode_t DUMP_mode = DUMP_HARD;
 
-int cmpInt(void * first, void * second)
+void treeSetDumpMode(dump_mode_t mode)
 {
-    assert(first);
-    assert(second);
-    int first_int  = *((int *)first);
-    int second_int = *((int *)second);
-    return first_int - second_int;
-}
-
-void intToStr(char * str, void * data)
-{
-    assert(str);
-    assert(data);
-    int data_int = *((int *)data);
-    sprintf(str, "%d", data_int);
+    DUMP_mode = mode;
 }
 
 node_t * newNode(void * data, size_t elem_size)
@@ -94,6 +78,7 @@ void printTree(node_t * node, printfunc_t printElem)
 void treeDestroy(node_t * node)
 {
     wlogPrint(LOG_DEBUG_PLUS, L"bintree: destroying tree (subtree) with root at %p...\n", node);
+
     if (node == NULL)
         return;
 
@@ -106,6 +91,7 @@ void treeDestroy(node_t * node)
         node->right = NULL;
     }
     delNode(node);
+
     wlogPrint(LOG_DEBUG_PLUS, L"bintree: destroyed tree (subtree) with root at %p\n", node);
 }
 
@@ -124,6 +110,7 @@ void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
 
     system("mkdir -p logs/dots/");
     system("mkdir -p logs/imgs/");
+
     sprintf(dot_file_name, "logs/dots/graph_%zu.dot", dump_count);
     sprintf(img_file_name, "logs/imgs/graph_%zu.svg", dump_count);
 
@@ -162,6 +149,7 @@ void treeDumpGraphWcs(node_t * root_node, elemtowcs_func_t elemToStr)
 
     system("mkdir -p logs/dots/");
     system("mkdir -p logs/imgs/");
+
     sprintf(dot_file_name, "logs/dots/graph_%zu.dot", dump_count);
     sprintf(img_file_name, "logs/imgs/graph_%zu.svg", dump_count);
 
@@ -193,9 +181,14 @@ void treeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot_file)
 {
     assert(node);
     assert(dot_file);
+
     fwprintf(dot_file, L"digraph {\n");
-    fwprintf(dot_file, L"node [style=filled,color=\"#000000\"]");
+    if (DUMP_mode == DUMP_MEDIUM || DUMP_mode == DUMP_SOFT)
+        fwprintf(dot_file, L"splines = polyline\n");
+    fwprintf(dot_file, L"node [style=filled,color=\"#000000\"]\n");
+
     nodeMakeDotWcs(node, elemToStr, dot_file);
+
     fwprintf(dot_file, L"}\n");
 }
 
@@ -203,9 +196,12 @@ void treeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file)
 {
     assert(node);
     assert(dot_file);
+
     fprintf(dot_file, "digraph {\n");
     fprintf(dot_file, "node [style=filled,color=\"#000000\"]");
+
     nodeMakeDot(node, elemToStr, dot_file);
+
     fprintf(dot_file, "}\n");
 }
 
@@ -214,13 +210,14 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
     assert(node);
     assert(dot_file);
 
-    size_t node_num = (size_t)node; //TODO: cringe?
-    //static size_t node_num = 0;
+    size_t node_num = (size_t)node;
     const size_t MAX_ELEM_STR_LEN = 64;
+
     char elem_str[MAX_ELEM_STR_LEN] = "";
     elemToStr(elem_str, node->data);
 
-        const char * COLOR_STR = "";
+    const char * COLOR_STR = "";
+
     if (node->parent == NULL)
         COLOR_STR = ROOT_COLOR;
     else
@@ -231,58 +228,98 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
                       "\"{node at %p | parent = %p | \\\"%s\\\" | {<f0> left = %p |<f1> right = %p}}\","
                       "fillcolor=\"%s\"];\n",
                       node_num, node, node->parent, elem_str, node->left, node->right, COLOR_STR);
+
     if (node->parent != NULL){
-        size_t node_parent_num = (size_t)(node->parent); //TODO: cringe?
+        size_t node_parent_num = (size_t)(node->parent);
+
         if (node == node->parent->left)
             fprintf(dot_file, "node_%zu:f0->node_%zu;\n", node_parent_num, node_num);
         else
             fprintf(dot_file, "node_%zu:f1->node_%zu;\n", node_parent_num, node_num);
     }
+
     if (node->left  != NULL)
         nodeMakeDot(node->left,  elemToStr, dot_file);
+
     if (node->right != NULL)
         nodeMakeDot(node->right, elemToStr, dot_file);
 }
+
+static void dotPrintNodeWcs(FILE * dot_file, node_t * node, elemtowcs_func_t elemToStr, const char * color_str);
 
 static void nodeMakeDotWcs(node_t * node, elemtowcs_func_t elemToStr, FILE * dot_file)
 {
     assert(node);
     assert(dot_file);
 
-    size_t node_num = (size_t)node; //TODO: cringe?
+    size_t node_num = (size_t)node;
 
-    const size_t MAX_ELEM_STR_LEN = 64;
-    wchar_t elem_str[MAX_ELEM_STR_LEN] = L"";
-    elemToStr(elem_str, node->data);
+    const char * color_str = "";
 
-    const char * COLOR_STR = "";
     if (node->parent == NULL)
-        COLOR_STR = ROOT_COLOR;
+        color_str = ROOT_COLOR;
     else
-        COLOR_STR = (node == node->parent->left) ? LEFT_COLOR : RIGHT_COLOR;
+        color_str = (node == node->parent->left) ? LEFT_COLOR : RIGHT_COLOR;
 
-    fwprintf(dot_file, L"node_%zu"
-                       L"[shape=Mrecord,label="
-                       L"\"{node at %p | parent = %p | \\\"%ls\\\" | {<f0> left = %p |<f1> right = %p}}\","
-                       L"fillcolor=\"%s\"];\n",
-                       node_num, node, node->parent, elem_str, node->left, node->right, COLOR_STR);
+    dotPrintNodeWcs(dot_file, node, elemToStr, color_str);
+
     if (node->parent != NULL){
-        size_t node_parent_num = (size_t)(node->parent); //TODO: cringe?
+        size_t node_parent_num = (size_t)(node->parent);
+
         if (node == node->parent->left)
             fwprintf(dot_file, L"node_%zu:f0->node_%zu;\n", node_parent_num, node_num);
         else
             fwprintf(dot_file, L"node_%zu:f1->node_%zu;\n", node_parent_num, node_num);
     }
+
     if (node->left  != NULL)
         nodeMakeDotWcs(node->left,  elemToStr, dot_file);
+
     if (node->right != NULL)
         nodeMakeDotWcs(node->right, elemToStr, dot_file);
+}
+
+static void dotPrintNodeWcs(FILE * dot_file, node_t * node, elemtowcs_func_t elemToStr, const char * color_str)
+{
+    size_t node_num = (size_t)node;
+
+    const size_t MAX_ELEM_STR_LEN = 64;
+    wchar_t elem_str[MAX_ELEM_STR_LEN] = L"";
+    elemToStr(elem_str, node->data);
+
+    switch (DUMP_mode){
+        case DUMP_HARD:
+            fwprintf(dot_file, L"node_%zu"
+                       L"[shape=Mrecord,label="
+                       L"\"{node at %p | parent = %p | \\\"%ls\\\" | {<f0> left = %p |<f1> right = %p}}\","
+                       L"fillcolor=\"%s\"];\n",
+                       node_num, node, node->parent, elem_str, node->left, node->right, color_str);
+            break;
+
+        case DUMP_MEDIUM:
+            fwprintf(dot_file, L"node_%zu"
+                       L"[shape=Mrecord,label="
+                       L"\"{\\\"%ls\\\" | {<f0> left|<f1> right}}\","
+                       L"fillcolor=\"%s\"];\n",
+                       node_num, elem_str, color_str);
+            break;
+
+        case DUMP_SOFT:
+            fwprintf(dot_file, L"node_%zu"
+                       L"[shape=Mrecord,label="
+                       L"\"{<f0>\\\"%ls\\\" | <f1>}\","
+                       L"fillcolor=\"%s\"];\n",
+                       node_num, elem_str, color_str);
+            break;
+    }
 }
 
 node_t * treeFindNode(node_t * node, void * data, compare_func_t cmp)
 {
     assert(data);
+
     wlogPrint(LOG_DEBUG_PLUS, L"finding node in tree (%p)...\n", node);
+
     if (node == NULL)
         return NULL;
 
@@ -295,4 +332,28 @@ node_t * treeFindNode(node_t * node, void * data, compare_func_t cmp)
 
     next_node_result = treeFindNode(node->right, data, cmp);
     return next_node_result;
+}
+
+
+void printInt(void * data)
+{
+    assert(data);
+    printf("%d", *((int *)data));
+}
+
+int cmpInt(void * first, void * second)
+{
+    assert(first);
+    assert(second);
+    int first_int  = *((int *)first);
+    int second_int = *((int *)second);
+    return first_int - second_int;
+}
+
+void intToStr(char * str, void * data)
+{
+    assert(str);
+    assert(data);
+    int data_int = *((int *)data);
+    sprintf(str, "%d", data_int);
 }
