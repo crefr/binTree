@@ -126,7 +126,7 @@ void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
     sprintf(img_file_name, "logs/imgs/graph_%zu.svg", dump_count);
 
     FILE * dot_file = fopen(dot_file_name, "w");
-    treeMakeDotWcs(root_node, elemToStr, dot_file);
+    treeMakeDot(root_node, elemToStr, dot_file);
     fclose(dot_file);
 
     char sys_dot_cmd[MAX_FILE_NAME] = "";
@@ -135,12 +135,12 @@ void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
 
     char img_file_name_log[MAX_FILE_NAME] = "";
     sprintf(img_file_name_log, "imgs/graph_%zu.svg", dump_count);
-    logPrint(LOG_DEBUG, L"<img src = %s width = \"%d%%\" height = \"%d%%\">",
+    logPrint(LOG_DEBUG, "<img src = %s width = \"%d%%\" height = \"%d%%\">",
                         img_file_name_log,
                         IMG_WIDTH_IN_PERCENTS,
                         IMG_HEIGTH_IN_PERCENTS);
 
-    logPrint(LOG_DEBUG, L"<hr>");
+    logPrint(LOG_DEBUG, "<hr>");
 
     dump_count++;
 }
@@ -152,14 +152,14 @@ void treeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file)
     assert(node);
     assert(dot_file);
 
-    fprintf(dot_file, L"digraph {\n");
+    fprintf(dot_file, "digraph {\n");
     if (DUMP_mode == DUMP_MEDIUM || DUMP_mode == DUMP_SOFT)
-        fprintf(dot_file, L"splines = polyline\n");
-    fprintf(dot_file, L"node [style=filled,color=\"#000000\"]\n");
+        fprintf(dot_file, "splines = polyline\n");
+    fprintf(dot_file, "node [style=filled,color=\"#000000\"]\n");
 
     nodeMakeDot(node, elemToStr, dot_file);
 
-    fprintf(dot_file, L"}\n");
+    fprintf(dot_file, "}\n");
 }
 
 static void dotPrintNode(FILE * dot_file, node_t * node, elemtostr_func_t elemToStr, const char * color_str);
@@ -184,9 +184,9 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
         size_t node_parent_num = (size_t)(node->parent);
 
         if (node == node->parent->left)
-            fprintf(dot_file, L"node_%zu:f0->node_%zu;\n", node_parent_num, node_num);
+            fprintf(dot_file, "node_%zu:f0->node_%zu;\n", node_parent_num, node_num);
         else
-            fprintf(dot_file, L"node_%zu:f1->node_%zu;\n", node_parent_num, node_num);
+            fprintf(dot_file, "node_%zu:f1->node_%zu;\n", node_parent_num, node_num);
     }
 
     if (node->left  != NULL)
@@ -206,26 +206,26 @@ static void dotPrintNode(FILE * dot_file, node_t * node, elemtostr_func_t elemTo
 
     switch (DUMP_mode){
         case DUMP_HARD:
-            fprintf(dot_file, L"node_%zu"
-                       L"[shape=Mrecord,label="
-                       L"\"{node at %p | parent = %p | \\\"%s\\\" | {<f0> left = %p |<f1> right = %p}}\","
-                       L"fillcolor=\"%s\"];\n",
+            fprintf(dot_file, "node_%zu"
+                       "[shape=Mrecord,label="
+                       "\"{node at %p | parent = %p | \\\"%s\\\" | {<f0> left = %p |<f1> right = %p}}\","
+                       "fillcolor=\"%s\"];\n",
                        node_num, node, node->parent, elem_str, node->left, node->right, color_str);
             break;
 
         case DUMP_MEDIUM:
-            fprintf(dot_file, L"node_%zu"
-                       L"[shape=Mrecord,label="
-                       L"\"{\\\"%s\\\" | {<f0> left|<f1> right}}\","
-                       L"fillcolor=\"%s\"];\n",
+            fprintf(dot_file, "node_%zu"
+                       "[shape=Mrecord,label="
+                       "\"{\\\"%s\\\" | {<f0> left|<f1> right}}\","
+                       "fillcolor=\"%s\"];\n",
                        node_num, elem_str, color_str);
             break;
 
         case DUMP_SOFT:
-            fprintf(dot_file, L"node_%zu"
-                       L"[shape=Mrecord,label="
-                       L"\"{<f0>\\\"%s\\\" | <f1>}\","
-                       L"fillcolor=\"%s\"];\n",
+            fprintf(dot_file, "node_%zu"
+                       "[shape=Mrecord,label="
+                       "\"{<f0>\\\"%s\\\" | <f1>}\","
+                       "fillcolor=\"%s\"];\n",
                        node_num, elem_str, color_str);
             break;
     }
@@ -235,7 +235,7 @@ node_t * treeFindNode(node_t * node, void * data, compare_func_t cmp)
 {
     assert(data);
 
-    logPrint(LOG_DEBUG_PLUS, L"finding node in tree (%p)...\n", node);
+    logPrint(LOG_DEBUG_PLUS, "finding node in tree (%p)...\n", node);
 
     if (node == NULL)
         return NULL;
