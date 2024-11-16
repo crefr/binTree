@@ -1,8 +1,6 @@
 #ifndef BINTREE_INCLUDED
 #define BINTREE_INCLUDED
 
-#include <wchar.h>
-
 /// @brief structure for node
 typedef struct node {
     void * data;

@@ -2,7 +2,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include <wchar.h>
 
 #include "logger.h"
 #include "bintree.h"
