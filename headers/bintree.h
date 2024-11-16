@@ -15,7 +15,6 @@ typedef struct node {
 typedef void(*printfunc_t)(void *);
 typedef int (*compare_func_t)(void *, void *);
 typedef void(*elemtostr_func_t)(char *, void *);
-typedef void(*elemtowcs_func_t)(wchar_t *, void *);
 
 /// @brief dump mode
 typedef enum {
@@ -48,14 +47,8 @@ void treeSetDumpMode(dump_mode_t mode);
 /// @brief dumps graph to log file, operates with char strings
 void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr);
 
-/// @brief dumps graph to log file, operates with wide char strings
-void treeDumpGraphWcs(node_t * root_node, elemtowcs_func_t elemToStr);
-
 /// @brief makes dot file for current tree, starting with the root_node
 void treeMakeDot(node_t * root_node, elemtostr_func_t elemToStr, FILE * dot_file);
-
-/// @brief makes dot file for current tree, starting with the root_node, operates with wide char strings
-void treeMakeDotWcs(node_t * root_node, elemtowcs_func_t elemToStr, FILE * dot_file);
 
 /*---------------------------------------------------------------------------------*/
 int cmpInt(void * first, void * second);
