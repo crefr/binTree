@@ -13,7 +13,7 @@ void treeSetDumpMode(dump_mode_t mode)
     DUMP_mode = mode;
 }
 
-node_t * newNode(void * data, size_t elem_size)
+node_t * newNode(void * data, size_t elem_size, node_t * left_child, node_t * right_child)
 {
     assert(data);
 
@@ -25,8 +25,8 @@ node_t * newNode(void * data, size_t elem_size)
     new_node->data = calloc(1, elem_size);
     memcpy(new_node->data, data, elem_size);
 
-    new_node->left   = NULL;
-    new_node->right  = NULL;
+    new_node->left  =  left_child;
+    new_node->right = right_child;
     new_node->parent = NULL;
 
     logPrint(LOG_DEBUG_PLUS, "bintree: created node at %p\n", new_node);
@@ -50,7 +50,7 @@ void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_
 {
     if (cmp(data, node->data) <= 0){
         if (node->left == NULL){
-            node_t * new_node = newNode(data, elem_size);
+            node_t * new_node = newNode(data, elem_size, NULL, NULL);
             node->left = new_node;
             new_node->parent = node;
         }
@@ -59,7 +59,7 @@ void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_
     }
     else {
         if (node->right == NULL){
-            node_t * new_node = newNode(data, elem_size);
+            node_t * new_node = newNode(data, elem_size, NULL, NULL);
             node->right = new_node;
             new_node->parent = node;
         }
