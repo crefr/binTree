@@ -1,4 +1,6 @@
 FILENAME = bintree.exe
+LIBNAME  = Obj/bintree.a
+
 OBJDIR = Obj/
 SRCDIR = sources/
 HEADDIR = headers/
@@ -42,12 +44,21 @@ ALLDEPS = $(HEADDIR)bintree.h $(HEADDIR)logger.h
 OBJECTS = main.o logger.o bintree.o
 OBJECTS_WITH_DIR = $(addprefix $(OBJDIR),$(OBJECTS))
 
+LIB_OBJECTS = logger.o bintree.o
+LIB_OBJECTS_WITH_DIR = $(addprefix $(OBJDIR),$(LIB_OBJECTS))
+
 $(FILENAME): $(OBJECTS_WITH_DIR)
 	$(CC) $(CFLAGS) $^ -o $@
+
+$(LIBNAME):  $(LIB_OBJECTS_WITH_DIR)
+	ar rcs $@ $^
 
 $(OBJECTS_WITH_DIR): $(OBJDIR)%.o: $(SRCDIR)%.cpp $(ALLDEPS)
 	mkdir -p $(OBJDIR)
 	$(CC) $(CFLAGS) -c $< -o $@
+
+static_lib: $(LIBNAME)
+	echo "static lib exists now"
 
 clean:
 	rm $(OBJDIR)*
