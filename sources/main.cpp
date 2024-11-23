@@ -10,11 +10,11 @@ int main()
     logStart("logs/log.html", LOG_DEBUG, LOG_HTML);
 
     int start_val = 128;
-    node_t * start_node = newNode(&start_val, sizeof(start_val));
+    node_t * start_node = newNode(&start_val, sizeof(start_val), NULL, NULL, 0);
 
     for (int i = 0; i < 8; i++){
         int ans =  rand() % 4;
-        treeSortAddNode(start_node, &ans, sizeof(ans), cmpInt);
+        treeSortAddNode(start_node, &ans, sizeof(ans), cmpInt, 0);
     }
 
     int find_ans = 2;

@@ -13,7 +13,7 @@ void treeSetDumpMode(dump_mode_t mode)
     DUMP_mode = mode;
 }
 
-node_t * newNode(void * data, size_t elem_size, node_t * left_child, node_t * right_child)
+node_t * newNode(void * data, size_t elem_size, node_t * left_child, node_t * right_child, uint32_t color)
 {
     assert(data);
 
@@ -27,7 +27,14 @@ node_t * newNode(void * data, size_t elem_size, node_t * left_child, node_t * ri
 
     new_node->left  =  left_child;
     new_node->right = right_child;
-    new_node->parent = NULL;
+
+    if (left_child  != NULL)
+        left_child-> parent = new_node;
+
+    if (right_child != NULL)
+        right_child->parent = new_node;
+
+    new_node->color_for_dump = color;
 
     logPrint(LOG_DEBUG_PLUS, "bintree: created node at %p\n", new_node);
 
@@ -46,25 +53,25 @@ void delNode(node_t * node)
     logPrint(LOG_DEBUG_PLUS, "bintree: deleted node\n");
 }
 
-void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_t cmp)
+void treeSortAddNode(node_t * node, void * data, size_t elem_size, compare_func_t cmp, uint32_t color)
 {
     if (cmp(data, node->data) <= 0){
         if (node->left == NULL){
-            node_t * new_node = newNode(data, elem_size, NULL, NULL);
+            node_t * new_node = newNode(data, elem_size, NULL, NULL, color);
             node->left = new_node;
             new_node->parent = node;
         }
         else
-            treeSortAddNode(node->left, data, elem_size, cmp);
+            treeSortAddNode(node->left, data, elem_size, cmp, color);
     }
     else {
         if (node->right == NULL){
-            node_t * new_node = newNode(data, elem_size, NULL, NULL);
+            node_t * new_node = newNode(data, elem_size, NULL, NULL, color);
             node->right = new_node;
             new_node->parent = node;
         }
         else
-            treeSortAddNode(node->right, data, elem_size, cmp);
+            treeSortAddNode(node->right, data, elem_size, cmp, color);
     }
 }
 
@@ -161,7 +168,7 @@ void treeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file)
     fprintf(dot_file, "}\n");
 }
 
-static void dotPrintNode(FILE * dot_file, node_t * node, elemtostr_func_t elemToStr, const char * color_str);
+static void dotPrintNode(FILE * dot_file, node_t * node, elemtostr_func_t elemToStr);
 
 static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_file)
 {
@@ -170,14 +177,7 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
 
     size_t node_num = (size_t)node;
 
-    const char * color_str = "";
-
-    if (node->parent == NULL)
-        color_str = ROOT_COLOR;
-    else
-        color_str = (node == node->parent->left) ? LEFT_COLOR : RIGHT_COLOR;
-
-    dotPrintNode(dot_file, node, elemToStr, color_str);
+    dotPrintNode(dot_file, node, elemToStr);
 
     if (node->parent != NULL){
         size_t node_parent_num = (size_t)(node->parent);
@@ -195,7 +195,7 @@ static void nodeMakeDot(node_t * node, elemtostr_func_t elemToStr, FILE * dot_fi
         nodeMakeDot(node->right, elemToStr, dot_file);
 }
 
-static void dotPrintNode(FILE * dot_file, node_t * node, elemtostr_func_t elemToStr, const char * color_str)
+static void dotPrintNode(FILE * dot_file, node_t * node, elemtostr_func_t elemToStr)
 {
     size_t node_num = (size_t)node;
 
@@ -208,24 +208,24 @@ static void dotPrintNode(FILE * dot_file, node_t * node, elemtostr_func_t elemTo
             fprintf(dot_file, "node_%zu"
                        "[shape=Mrecord,label="
                        "\"{node at %p | parent = %p | \\\"%s\\\" | {<f0> left = %p |<f1> right = %p}}\","
-                       "fillcolor=\"%s\"];\n",
-                       node_num, node, node->parent, elem_str, node->left, node->right, color_str);
+                       "fillcolor=\"#%08X\"];\n",
+                       node_num, node, node->parent, elem_str, node->left, node->right, node->color_for_dump);
             break;
 
         case DUMP_MEDIUM:
             fprintf(dot_file, "node_%zu"
                        "[shape=Mrecord,label="
                        "\"{\\\"%s\\\" | {<f0> left|<f1> right}}\","
-                       "fillcolor=\"%s\"];\n",
-                       node_num, elem_str, color_str);
+                       "fillcolor=\"#%08X\"];\n",
+                       node_num, elem_str, node->color_for_dump);
             break;
 
         case DUMP_SOFT:
             fprintf(dot_file, "node_%zu"
                        "[shape=Mrecord,label="
                        "\"{<f0>\\\"%s\\\" | <f1>}\","
-                       "fillcolor=\"%s\"];\n",
-                       node_num, elem_str, color_str);
+                       "fillcolor=\"#%08X\"];\n",
+                       node_num, elem_str, node->color_for_dump);
             break;
     }
 }
