@@ -112,6 +112,19 @@ void treeDestroy(node_t * node)
     logPrint(LOG_DEBUG_PLUS, "bintree: destroyed tree (subtree) with root at %p\n", node);
 }
 
+node_t * treeCopy(node_t * node)
+{
+    if (node == NULL)
+        return NULL;
+
+    node_t * new_node = newNode(node->data, node->elem_size,
+        treeCopy(node->left),
+        treeCopy(node->right),
+        node->color_for_dump);
+
+    return new_node;
+}
+
 void treeDumpGraph(node_t * root_node, elemtostr_func_t elemToStr)
 {
     assert(root_node);
